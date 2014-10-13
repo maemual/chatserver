@@ -141,6 +141,7 @@ func (chatServer *ChatServer) DealSendMessage(message string) {
 	json.Unmarshal([]byte(message), &r)
 	if r.MsgType == "single" {
 		uuid := GetUserUUID(r.RecvID)
+		InsertMessage(r.SendID, r.RecvID, r.MsgType, r.Message)
 		go chatServer.SendMessage([]byte(message), uuid)
 	} else if r.MsgType == "group" {
 

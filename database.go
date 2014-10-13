@@ -2,14 +2,12 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
 
 	_ "github.com/go-sql-driver/mysql"
 )
 
 func CreateUser(nickname string, password string) (int64, error) {
-	fmt.Println(APP_VER)
 	pd := PasswordHash(password)
 	stmt, err := db.Prepare("insert into chat.user (nickname, password) values (?, ?)")
 	if err != nil {
@@ -59,8 +57,10 @@ func UpdateUserUUID(uuid string, user_id int) {
 	stmt.Exec(uuid, user_id)
 }
 
-func InsertMessage(send_id int, receive_id, target_type string, message string) {
-
+func InsertMessage(send_id, receive_id int, target_type string, message string) {
+	stmt, _ := db.Prepare("insert into chat.message (send_id, receiver_id, type, message, time) values(?, ?, ?, ?, NOW())")
+	defer stmt.Close()
+	stmt.Exec(send_id, receive_id, target_type, message)
 }
 
 func GetBuddyList(user_id int) {
