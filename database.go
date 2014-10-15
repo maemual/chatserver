@@ -51,6 +51,20 @@ func GetUserUUID(user_id int) string {
 	return ""
 }
 
+func GetUserName(user_id int) string {
+	var name string
+	err := db.QueryRow("SELECT nickname FROM chat.user WHERE id = ?", user_id).Scan(&name)
+	switch {
+	case err == sql.ErrNoRows:
+		log.Printf("No user with that ID.")
+	case err != nil:
+		log.Fatal(err)
+	default:
+		return name
+	}
+	return ""
+}
+
 func UpdateUserUUID(uuid string, user_id int) {
 	stmt, _ := db.Prepare("update chat.user set last_token = ? where id = ?")
 	defer stmt.Close()
@@ -63,8 +77,22 @@ func InsertMessage(send_id, receive_id int, target_type string, message string) 
 	stmt.Exec(send_id, receive_id, target_type, message)
 }
 
-func GetBuddyList(user_id int) {
-
+func GetBuddyList(user_id int) (result []map[string]interface{}) {
+	rows, err := db.Query("select buddy_id from chat.buddy where user_id = ?", user_id)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var x int
+		rows.Scan(&x)
+		tmp := map[string]interface{}{
+			"id":   x,
+			"name": GetUserName(x),
+		}
+		result = append(result, tmp)
+	}
+	return
 }
 
 func GetGroupList(user_id int) {

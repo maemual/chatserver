@@ -70,3 +70,13 @@ type DeleteBuddyRequest struct {
 type DeleteBuddyResponse struct {
 	AddBuddyResponse
 }
+
+type GetBuddyListRequest struct {
+	base
+	SendID int `json:"sendid"`
+}
+
+type GetBuddyListResponse struct {
+	base
+	List []map[string]interface{} `json:"list"`
+}
