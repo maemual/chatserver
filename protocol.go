@@ -52,3 +52,21 @@ type SendMessageRequest struct {
 	MsgType string `json:"msgtype"`
 	Message string `json:"message"`
 }
+
+type AddBuddyRequest struct {
+	base
+	SendID  int `json:"sendid"`
+	BuddyID int `json:"buddyid"`
+}
+
+type AddBuddyResponse struct {
+	response
+}
+
+type DeleteBuddyRequest struct {
+	AddBuddyRequest
+}
+
+type DeleteBuddyResponse struct {
+	AddBuddyResponse
+}

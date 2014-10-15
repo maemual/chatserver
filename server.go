@@ -56,6 +56,10 @@ func (chatServer *ChatServer) DispatchMessage(message string) {
 			go chatServer.DealLogin(message)
 		case "logout":
 			go chatServer.DealLogout(message)
+		case "addbuddy":
+			go chatServer.DealAddBuddy(message)
+		case "deletebuddy":
+			go chatServer.DealDeleteBuddy(message)
 		}
 	} else if messageType == "response" {
 
@@ -146,6 +150,34 @@ func (chatServer *ChatServer) DealSendMessage(message string) {
 	} else if r.MsgType == "group" {
 
 	}
+}
+
+func (chatServer *ChatServer) DealAddBuddy(message string) {
+	var r AddBuddyRequest
+	json.Unmarshal([]byte(message), &r)
+	AddBuddy(r.SendID, r.BuddyID)
+	AddBuddy(r.BuddyID, r.SendID)
+	var rsp AddBuddyResponse
+	rsp.Action = r.Action
+	rsp.Type = "response"
+	rsp.Ok = "ok"
+	rsp.Token = r.Token
+	response, _ := json.Marshal(rsp)
+	go chatServer.SendMessage(response, r.Token)
+}
+
+func (chatServer *ChatServer) DealDeleteBuddy(message string) {
+	var r DeleteBuddyRequest
+	json.Unmarshal([]byte(message), &r)
+	DeleteBuddy(r.SendID, r.BuddyID)
+	DeleteBuddy(r.BuddyID, r.SendID)
+	var rsp DeleteBuddyResponse
+	rsp.Action = r.Action
+	rsp.Type = "response"
+	rsp.Ok = "ok"
+	rsp.Token = r.Token
+	response, _ := json.Marshal(rsp)
+	go chatServer.SendMessage(response, r.Token)
 }
 
 func (chatServer *ChatServer) DealGetBuddyList(message string) {
