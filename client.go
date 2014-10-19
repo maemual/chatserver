@@ -8,8 +8,10 @@ import (
 type Client struct {
 	incoming chan string
 	outgoing chan string
+	exit     chan string
 	reader   *bufio.Reader
 	writer   *bufio.Writer
+	token    string
 }
 
 func NewClient(connetction net.Conn) *Client {
@@ -19,6 +21,7 @@ func NewClient(connetction net.Conn) *Client {
 	client := &Client{
 		incoming: make(chan string),
 		outgoing: make(chan string),
+		exit:     make(chan string),
 		reader:   reader,
 		writer:   writer,
 	}
@@ -35,6 +38,10 @@ func (client *Client) Listen() {
 func (client *Client) Read() {
 	for {
 		line, _ := client.reader.ReadString('\n')
+		if len(line) == 0 {
+			client.exit <- client.token
+			break
+		}
 		client.incoming <- line
 	}
 }

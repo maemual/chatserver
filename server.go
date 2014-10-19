@@ -14,6 +14,7 @@ type ChatServer struct {
 	joins    chan net.Conn
 	incoming chan string
 	outgoing chan string
+	exit     chan string
 }
 
 func NewChatServer() *ChatServer {
@@ -22,6 +23,7 @@ func NewChatServer() *ChatServer {
 		joins:    make(chan net.Conn),
 		incoming: make(chan string),
 		outgoing: make(chan string),
+		exit:     make(chan string),
 	}
 
 	chatServer.Listen()
@@ -37,13 +39,41 @@ func (chatServer *ChatServer) Listen() {
 				chatServer.DispatchMessage(data)
 			case data := <-chatServer.joins:
 				chatServer.Join(data)
+			case data := <-chatServer.exit:
+				chatServer.Exit(data)
 			}
 		}
 	}()
 }
 
+func (chatServer *ChatServer) Join(conn net.Conn) {
+	client := NewClient(conn)
+	uuid := NewUUID()
+	client.token = uuid
+	chatServer.clients[uuid] = client
+	go chatServer.DealConnect(client, uuid)
+	go func() {
+		for {
+			chatServer.incoming <- <-client.incoming
+		}
+	}()
+	go func() {
+		for {
+			chatServer.exit <- <-client.exit
+		}
+	}()
+}
+
+func (chatServer *ChatServer) Exit(token string) {
+	delete(chatServer.clients, token)
+}
+
 func (chatServer *ChatServer) DispatchMessage(message string) {
 	js, _ := simplejson.NewJson([]byte(message))
+
+	if _, ok := js.CheckGet("type"); !ok {
+		return
+	}
 	messageType := js.Get("type").MustString()
 	if messageType == "request" {
 		action := js.Get("action").MustString()
@@ -66,18 +96,6 @@ func (chatServer *ChatServer) DispatchMessage(message string) {
 	} else if messageType == "response" {
 
 	}
-}
-
-func (chatServer *ChatServer) Join(conn net.Conn) {
-	client := NewClient(conn)
-	uuid := NewUUID()
-	chatServer.clients[uuid] = client
-	go chatServer.DealConnect(client, uuid)
-	go func() {
-		for {
-			chatServer.incoming <- <-client.incoming
-		}
-	}()
 }
 
 func (chatServer *ChatServer) SendMessage(message []byte, uuid string) {

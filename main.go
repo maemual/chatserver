@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"net"
 	"os"
 
@@ -14,7 +15,8 @@ import (
 const APP_VER = "0.1.0"
 
 var (
-	db *sql.DB
+	db     *sql.DB
+	logger *log.Logger
 )
 
 func main() {
