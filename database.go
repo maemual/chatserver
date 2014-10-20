@@ -103,9 +103,15 @@ func AddBuddy(user_id, friend_id int) {
 	var tmp int
 	err := db.QueryRow("select user_id from chat.buddy where user_id = ? and buddy_id = ?", user_id, friend_id).Scan(&tmp)
 	if err == sql.ErrNoRows {
-		stmt, _ := db.Prepare("insert into chat.buddy (user_id, buddy_id) values(?, ?)")
-		defer stmt.Close()
-		stmt.Exec(user_id, friend_id)
+		err = db.QueryRow("select id from chat.user where id = ?", user_id).Scan(&tmp)
+		if err == nil {
+			err = db.QueryRow("select id from chat.user where id = ?", friend_id).Scan(&tmp)
+			if err == nil {
+				stmt, _ := db.Prepare("insert into chat.buddy (user_id, buddy_id) values(?, ?)")
+				defer stmt.Close()
+				stmt.Exec(user_id, friend_id)
+			}
+		}
 	}
 }
 
