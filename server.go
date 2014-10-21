@@ -140,6 +140,7 @@ func (chatServer *ChatServer) DealLogin(message string) {
 	if CheckLogin(r.SendID, r.Password) {
 		UpdateUserUUID(r.Token, r.SendID)
 		resp.Ok = "ok"
+		resp.Nickname = GetUserName(r.SendID)
 	} else {
 		resp.Ok = "no"
 	}

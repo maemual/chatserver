@@ -34,6 +34,7 @@ type LoginRequest struct {
 
 type LoginResponse struct {
 	response
+	Nickname string `json:"nickname"`
 }
 
 type LogoutRequest struct {
