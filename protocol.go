@@ -81,3 +81,25 @@ type GetBuddyListResponse struct {
 	base
 	List []map[string]interface{} `json:"list"`
 }
+
+type GetUserInfoRequest struct {
+	base
+	SendID int `json:"sendid"`
+	UserID int `json:"userid"`
+}
+
+type GetUserInfoResponse struct {
+	response
+	Nickname string `json:"nickname"`
+}
+
+type GetTalkMessageRequest struct {
+	base
+	SendID int `json:"sendid"`
+	RecvID int `json:"recvid"`
+}
+
+type GetTalkMessageResponse struct {
+	base
+	List []map[string]interface{} `json:"list"`
+}

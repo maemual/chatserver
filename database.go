@@ -95,6 +95,24 @@ func GetBuddyList(user_id int) (result []map[string]interface{}) {
 	return
 }
 
+func GetTalkMessage(send_id, recv_id int) (result []map[string]interface{}) {
+	rows, err := db.Query("select message, time from chat.message where send_id = ? and receiver_id = ? order by time DESC limit 10", send_id, recv_id)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var msg, t string
+		rows.Scan(&msg, &t)
+		tmp := map[string]interface{}{
+			"message": msg,
+			"time":    t,
+		}
+		result = append(result, tmp)
+	}
+	return
+}
+
 func GetGroupList(user_id int) {
 
 }

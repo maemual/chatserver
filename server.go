@@ -92,6 +92,10 @@ func (chatServer *ChatServer) DispatchMessage(message string) {
 			go chatServer.DealDeleteBuddy(message)
 		case "getbuddylist":
 			go chatServer.DealGetBuddyList(message)
+		case "getuserinfo":
+			go chatServer.DealGetUserInfo(message)
+		case "gettalkmessage":
+			go chatServer.DealGetTalkMessage(message)
 		}
 	} else if messageType == "response" {
 
@@ -210,6 +214,32 @@ func (chatServer *ChatServer) DealGetBuddyList(message string) {
 	rsp.Type = "response"
 	rsp.Token = r.Token
 	rsp.List = list
+	response, _ := json.Marshal(rsp)
+	go chatServer.SendMessage(response, r.Token)
+}
+
+func (chatServer *ChatServer) DealGetTalkMessage(message string) {
+	var r GetTalkMessageRequest
+	json.Unmarshal([]byte(message), &r)
+	list := GetTalkMessage(r.SendID, r.RecvID)
+	var rsp GetTalkMessageResponse
+	rsp.Action = r.Action
+	rsp.Type = "response"
+	rsp.Token = r.Token
+	rsp.List = list
+	response, _ := json.Marshal(rsp)
+	go chatServer.SendMessage(response, r.Token)
+}
+
+func (chatServer *ChatServer) DealGetUserInfo(message string) {
+	var r GetUserInfoRequest
+	json.Unmarshal([]byte(message), &r)
+	var rsp GetUserInfoResponse
+	rsp.Action = r.Action
+	rsp.Type = "response"
+	rsp.Token = r.Token
+	rsp.Ok = "ok"
+	rsp.Nickname = GetUserName(r.UserID)
 	response, _ := json.Marshal(rsp)
 	go chatServer.SendMessage(response, r.Token)
 }
