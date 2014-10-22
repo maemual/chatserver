@@ -4,6 +4,7 @@ import (
 	"log"
 	"net"
 	"os"
+	"time"
 
 	"github.com/codegangsta/cli"
 
@@ -38,9 +39,17 @@ func main() {
 
 		chatServer := NewChatServer()
 
-		listener, _ := net.Listen("tcp", ":"+c.String("port"))
+		addr, _ := net.ResolveTCPAddr("tcp", ":"+c.String("port"))
+		listener, err := net.ListenTCP("tcp", addr)
+		if err != nil {
+			panic(err)
+		}
+		defer listener.Close()
 		for {
-			conn, _ := listener.Accept()
+			conn, _ := listener.AcceptTCP()
+			conn.SetNoDelay(true)
+			conn.SetKeepAlive(true)
+			conn.SetKeepAlivePeriod(45 * time.Second)
 			chatServer.joins <- conn
 		}
 	}
