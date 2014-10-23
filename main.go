@@ -34,7 +34,7 @@ func main() {
 		},
 	}
 	app.Action = func(c *cli.Context) {
-		db, _ = sql.Open("mysql", "root:jych-0017@/chat")
+		db, _ = sql.Open("mysql", "root:xxxxxxx@/chat")
 		defer db.Close()
 
 		chatServer := NewChatServer()
